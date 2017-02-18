@@ -1,0 +1,177 @@
+#include<reg52.h>
+
+typedef unsigned char uchar;
+typedef unsigned int uint;
+
+sbit IR=P3^2;
+
+uchar irtime;
+uchar ircord[4];
+uchar irdata[33];
+bit irpro_ok,irok;
+
+void init()
+{
+	TMOD=0X22;
+	TH0=0X00;
+	TL0=0X00;
+	EA=1;
+	ET0=1;
+	TR0=1;
+	
+	IT0=1;
+	EX0=1;
+	TH1=0XFD;
+	TL1=0XFD;
+	TR1=1;
+	SM0=0;
+	SM1=1;
+}
+
+void time0() interrupt 1
+{
+	irtime++;
+}
+
+void int0() interrupt 0
+{
+	static uchar i;
+	static bit startflag;
+	if(startflag)
+	{
+		if((irtime<53)&&(irtime>=32))
+			i=0;
+		irdata[i]=irtime;
+		irtime=0;
+		i++;
+		if(i==33)
+		{
+			irok=1;
+			i=0;
+		}
+	}
+	else
+	{
+		irtime=0;
+		startflag=1;
+	}
+}
+void ircordpro()
+{
+	uchar i,j,k,cord,value;
+	k=1;
+	for(i=0;i<4;i++)
+	{
+		for(j=0;j<8;j++)
+		{
+			value>>=1;
+			cord=irdata[k];
+			if(cord>5)
+				value|=0x80;
+			k++;
+		}
+		ircord[i]=value;
+		value=0;
+	}
+	irpro_ok=1;
+}
+void main()
+{
+	uchar i;
+	init();
+	while(1)
+	{
+		if(irok)
+		{
+			ircordpro();
+			irok=0;
+			if(irpro_ok)
+			{
+				for(i=0;i<4;i++)
+				{
+					SBUF=ircord[i];
+					while(!TI);
+					TI=0;
+				}
+				irpro_ok=0;
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

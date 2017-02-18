@@ -1,0 +1,210 @@
+#include<reg52.h>
+#include<intrins.h>
+#define uchar unsigned char
+#define uint unsigned int
+
+bit write=0;
+sbit sda=P2^0;
+sbit scl=P2^1;
+sbit dula=P2^6;
+sbit wela=P2^7;
+uchar sec,tcnt;
+uchar code table[]={
+0x3f,0x06,0x5b,0x4f,
+0x66,0x6d,0x7d,0x07,
+0x7f,0x6f,0x77,0x7c,
+0x39,0x5e,0x79,0x71};
+void delay()
+{
+	_nop_();
+}
+void delayms(uint xms)
+{
+	uint i,j;
+	for(i=xms;i>0;i--)
+		for(j=114;j>0;j--);
+}
+void start()
+{
+	scl=1;
+	_nop_();
+	sda=1;
+	delay();
+	sda=0;
+	delay();
+}
+void stop()
+{
+	sda=0;
+	_nop_();
+	scl=1;
+	delay();
+	sda=1;
+	delay();
+}
+void init()
+{
+	sda=1;
+	_nop_();
+	scl=1;
+	_nop_();
+}
+void master_ack(bit i)
+{
+	scl=0;
+	_nop_();
+	if(i)
+		sda=0;
+	else
+		sda=1;
+	_nop_();
+	scl=1;
+	_nop_();
+	scl=0;
+	_nop_();
+	sda=1;
+	_nop_();
+}
+
+bit test_ack()
+{
+	scl=1;
+	if(sda)
+	{
+		scl=0;
+		stop();
+		return 0;
+	}
+	else
+	{
+		scl=0;
+		return 1;
+	}
+}
+
+void write_byte(uchar dat)
+{
+	uchar i,temp;
+	temp=dat;
+	for(i=0;i<8;i++)
+	{
+		temp<<=1;
+		scl=0;
+		_nop_();
+		sda=CY;
+		_nop_();
+		scl=1;
+		_nop_();
+	}
+	scl=0;
+	_nop_();
+	sda=1;
+	_nop_();
+}
+
+uchar read_byte()
+{
+	uchar i,k;
+	scl=0;
+	_nop_();
+	sda=1;
+	_nop_();
+	for(i=0;i<8;i++)
+	{
+		scl=1;
+		_nop_();
+		k=(k<<1)|sda;
+		scl=0;
+		_nop_();
+	}
+	return k;
+}
+
+bit write_add(uchar address,uchar dat)
+{
+	start();
+	write_byte(0xa0);
+	if(!test_ack())
+		return 0;
+	write_byte(address);
+	if(!test_ack())
+		return 0;
+	write_byte(dat);
+	if(!test_ack())
+		return 0;
+	stop();
+}
+uchar read_add(uchar address)
+{
+	uchar dat;
+	start();
+	write_byte(0xa0);
+	if(!test_ack())
+		return 0;
+	write_byte(address);
+	master_ack(0);
+	start();
+	write_byte(0xa1);
+	if(!test_ack())
+		return 0;
+	dat=read_byte();
+	stop();
+	return dat;
+}
+void display(uchar bai_c,uchar sh_c)		//数码管显示函数
+{
+	dula=1;
+	P0=table[bai_c];
+	dula=0;
+	
+	wela=1;
+	P0=0xfe;
+	wela=0;
+	delayms(5);
+	
+	dula=0;
+	P0=table[sh_c];
+	dula=1;
+	dula=0;
+	wela=0;
+	P0=0xfd;
+	wela=1;
+	wela=0;
+	delayms(5);
+}
+void main()
+{
+	init();
+	sec=read_add(2);
+	if(sec>100)
+		sec=0;
+	TMOD=0X01;
+	EA=1;
+	ET0=1;
+	TH0=(65536-45872)/256;
+	TL0=(65536-45872)%256;
+	TR0=1;
+	while(1)
+	{
+		display(sec/10,sec%10);
+		if(write==1)
+		{
+			write=0;
+			write_add(2,sec);
+		}
+	}
+}
+void time0() interrupt 1
+{
+	TH0=(65536-45872)/256;
+	TL0=(65536-45872)%256;
+	tcnt++;
+	if(tcnt==20)
+	{
+		tcnt=0;
+		sec++;
+		write=1;
+		if(sec==100)
+			sec=0;
+	}
+}

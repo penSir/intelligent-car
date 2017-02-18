@@ -1,0 +1,100 @@
+C51 COMPILER V9.55   MAIN                                                                  02/10/2017 09:14:54 PAGE 1   
+
+
+C51 COMPILER V9.55, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          //#include "Lcd1602.h"
+   2          
+   3          //void read_busy()
+   4          //{
+   5          //  uchar i;
+   6          //  P0=0xff;
+   7          //  RS=0;
+   8          //  RW=1;
+   9          //  do{
+  10          //    EN=1;
+  11          //    i=P0;
+  12          //    EN=0;
+  13          //  }while(i&0x80);
+  14          //}
+  15          ////LCD???
+  16          //void lcd_write_cmd(uchar cmd)
+  17          //{
+  18          //  read_busy();
+  19          //  RS=0;
+  20          //  RW=0;
+  21          //  P0=cmd;
+  22          //  EN=1;
+  23          //  EN=0;
+  24          //}
+  25          ////LCD???
+  26          //void lcd_write_dat(uchar dat)
+  27          //{
+  28          //  read_busy();
+  29          //  RS=1;
+  30          //  RW=0;
+  31          //  P0=dat;
+  32          //  EN=1;
+  33          //  EN=0;
+  34          //}
+  35          ////????
+  36          //void LcdSetCursor(uchar x,uchar y)
+  37          //{
+  38          //  uchar address;
+  39          //  if(y==0)
+  40          //    address=0x00+x;
+  41          //  else
+  42          //    address=0x40+x;
+  43          //  lcd_write_cmd(address|0x80);
+  44          //}
+  45          ////????????
+  46          //void displayonechar(uchar x,uchar y,uchar dat)
+  47          //{
+  48          //  if(y)
+  49          //    x|=0x40;
+  50          //  x|=0x80;
+  51          //  lcd_write_cmd(x);
+  52          //  lcd_write_dat(dat);
+  53          //}
+  54          ////????????
+C51 COMPILER V9.55   MAIN                                                                  02/10/2017 09:14:54 PAGE 2   
+
+  55          //void displayonestr(uchar x,uchar y,uchar dat)
+  56          //{
+  57          //  displayonechar(x++,y,dat/16+'0');
+  58          //  displayonechar(x,y,dat%16+'0');
+  59          //}
+  60          ////?????
+  61          //void LcdShowStr(uchar x,uchar y,uchar *str)
+  62          //{
+  63          //  LcdSetCursor(x,y);
+  64          //  while(*str!='\0')
+  65          //    lcd_write_dat(*str++);
+  66          //}
+  67          ////lcd???
+  68          //void lcdinit()
+  69          //{
+  70          //  lcd_write_cmd(0x38);
+  71          //  lcd_write_cmd(0x0c);
+  72          //  lcd_write_cmd(0x06);
+  73          //  lcd_write_cmd(0x01);
+  74          //}
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

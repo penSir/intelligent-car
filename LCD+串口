@@ -1,0 +1,255 @@
+#include<reg52.h>
+#define uchar unsigned char
+#define uint unsigned int
+
+sbit dula=P2^6;
+sbit wela=P2^7;
+//lcd
+sbit RS=P3^5;
+sbit RW=P3^6;
+sbit EN=P3^4;
+
+uchar flag,a,i,num;
+
+uchar code num[]={999};
+void read_busy()
+{
+	uchar busy;
+	P0=0xff;
+	RS=0;
+	RW=1;
+	do{
+		EN=1;
+		busy=P0;
+		EN=0;
+	}while(busy&0x80);
+}
+
+void write_cmd(uchar cmd)
+{
+	read_busy();
+	RS=0;
+	RW=0;
+	P0=cmd;
+	EN=1;
+	EN=0;
+}
+
+void write_dat(uchar dat)
+{
+	read_busy();
+	RS=1;
+	RW=0;
+	P0=dat;
+	EN=1;
+	EN=0;
+}
+
+void delayms(uint xms)
+{
+	uint i,j;
+	for(i=xms;i>0;i--)
+		for(j=114;j>0;j--);
+}
+
+uchar code table[]={
+0x3f,0x06,0x5b,0x4f,
+0x66,0x6d,0x7d,0x07,
+0x7f,0x6f,0x77,0x7c,
+0x39,0x5e,0x79,0x71};
+
+
+void display(uchar value)
+{
+	dula=0;
+	P0=table[value/10];
+	dula=1;
+	dula=0;
+	
+	wela=0;
+	P0=0xfe;
+	wela=1;
+	wela=0;
+	delayms(10);
+	
+	dula=0;
+	P0=table[value%10];
+	dula=1;
+	dula=0;
+	
+	wela=0;
+	P0=0xfd;
+	wela=1;
+	wela=0;
+	delayms(10);
+}
+void init()
+{
+	TMOD=0X20;
+	TH1=0XFD;
+	TL1=0XFD;
+	TR1=1;
+	EA=1;
+	ES=1;
+	SM0=0;
+	SM1=1;
+	REN=1;
+}
+
+void lcdinit()
+{
+	dula=0;
+	wela=0;
+	EN=0;
+	write_cmd(0x38);
+	write_cmd(0x0x);
+	write_cmd(0x06);
+	write_cmd(0x01);
+}
+
+void main()
+{
+	init();
+	lcdinit();
+	while(!flag);
+	write_cmd(0x80+0x01);
+	write_dat(a/10+'0');
+	write_dat(a%10+'0');
+	while(1)
+	{
+		display(a);
+	}
+}
+
+void ser() interrupt 4
+{
+	RI=0;
+	a=SBUF;
+	flag=1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,71 @@
+#include<reg52.h>
+#define uchar unsigned char
+#define uint unsigned int
+sbit EN=P3^4;
+sbit RS=P3^5;
+sbit RW=P3^6;
+sbit DU=P2^6;
+sbit WE=P2^7;
+uchar table1[]="hello world!";
+uchar table2[]="  zhaifeng  ";
+void delayms(uint xms)
+{
+	uint i,j;
+	for(i=xms;i>0;i--)
+		for(j=114;j>0;j--);
+}
+void read_busy()
+{
+	uchar busy;
+	P0=0XFF;
+	RS=0;
+	RW=1;
+	do{
+		EN=1;
+		busy=P0;
+		EN=0;
+	}while(busy&0x80);
+}
+void write_cmd(uchar cmd)
+{
+	read_busy();
+	RS=0;
+	RW=0;
+	P0=cmd;
+	EN=1;
+	EN=0;
+}
+void write_dat(uchar dat)
+{
+	read_busy();
+	RS=1;
+	RW=0;
+	P0=dat;
+	EN=1;
+	EN=0;
+}
+void init()
+{
+	write_cmd(0x38);
+	write_cmd(0x0c);
+	write_cmd(0x06);
+	write_cmd(0x01);
+}
+void main()
+{
+	uchar i;
+	DU=0;
+	WE=0;
+	init();
+	write_cmd(0x80+17);
+	for(i=0;i<12;i++)
+		write_dat(table1[i]);
+	write_cmd(0xc0+17);
+	for(i=0;i<10;i++)
+		write_dat(table2[i]);
+	for(i=0;i<16;i++)
+	{
+		write_cmd(0x18);
+		delayms(200);
+	}
+}

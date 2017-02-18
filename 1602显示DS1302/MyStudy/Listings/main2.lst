@@ -1,0 +1,212 @@
+C51 COMPILER V9.55   MAIN2                                                                 02/10/2017 09:14:54 PAGE 1   
+
+
+C51 COMPILER V9.55, COMPILATION OF MODULE MAIN2
+OBJECT MODULE PLACED IN .\Objects\main2.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main2.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mai
+                    -n2.lst) TABS(2) OBJECT(.\Objects\main2.obj)
+
+line level    source
+
+   1          //#include"LCD1602.h"
+   2          
+   3          //sbit SCLK=P1^0;
+   4          //sbit IO=P1^1;
+   5          //sbit RST=P1^2;
+   6          
+   7          //#define DS_W 0x80
+   8          //#define DS_R 0x81
+   9          
+  10          //uchar timedata[7]={50,58,23,15,2,1,16};
+  11          
+  12          ////????
+  13          //void delayms(uint xms)
+  14          //{
+  15          //  uint i;
+  16          //  do{
+  17          //    i=11059200UL/96000;
+  18          //    while(--i);
+  19          //  }while(--xms);
+  20          //}
+  21          //void ds_w_byte(uchar dat)
+  22          //{
+  23          //  uchar i;
+  24          //  for(i=0;i<8;i++)
+  25          //  {
+  26          //    SCLK=0;
+  27          //    IO=dat&0x01;
+  28          //    SCLK=1;
+  29          //    dat>>=1;
+  30          //  }
+  31          //}
+  32          //uchar ds_r_byte()
+  33          //{
+  34          //  uchar i,dat;
+  35          //  for(i=0;i<8;i++)
+  36          //  {
+  37          //    SCLK=0;
+  38          //    dat>>=1;
+  39          //    if(IO)
+  40          //      dat|=0x80;
+  41          //    SCLK=1;
+  42          //  }
+  43          //  return dat;
+  44          //}
+  45          //void write_ds(uchar cmd,uchar dat)
+  46          //{
+  47          //  RST=0;
+  48          //  SCLK=0;
+  49          //  RST=1;
+  50          //  ds_w_byte(cmd);
+  51          //  ds_w_byte(dat);
+  52          //}
+  53          //uchar read_ds(uchar cmd)
+  54          //{
+C51 COMPILER V9.55   MAIN2                                                                 02/10/2017 09:14:54 PAGE 2   
+
+  55          //  uchar dat;
+  56          //  RST=0;
+  57          //  SCLK=0;
+  58          //  RST=1;
+  59          //  ds_w_byte(cmd);
+  60          //  dat=ds_r_byte();
+  61          //  return dat;
+  62          //}
+  63          ///* //DS??????
+  64          //void write_ds(uchar cmd,uchar dat)
+  65          //{
+  66          //  uchar i;
+  67          //  RST=0;
+  68          //  SCLK=0;
+  69          //  RST=1;
+  70          //  for(i=0;i<8;i++)
+  71          //  {
+  72          //    SCLK=0;
+  73          //    IO=cmd&0x01;
+  74          //    SCLK=1;
+  75          //    cmd>>=1;
+  76          //  }
+  77          //  for(i=0;i<8;i++)
+  78          //  {
+  79          //    SCLK=0;
+  80          //    IO=dat&0x01;
+  81          //    SCLK=1;
+  82          //    dat>>=1;
+  83          //  }
+  84          //}
+  85          ////?DS??
+  86          //uchar read_ds(uchar cmd)
+  87          //{
+  88          //  uchar i,dat;
+  89          //  RST=0;
+  90          //  SCLK=0;
+  91          //  RST=1;
+  92          //  for(i=0;i<8;i++)
+  93          //  {
+  94          //    SCLK=0;
+  95          //    IO=cmd&0x01;
+  96          //    SCLK=1;
+  97          //    cmd>>=1;
+  98          //  }
+  99          //  for(i=0;i<8;i++)
+ 100          //  {
+ 101          //    SCLK=0;
+ 102          //    dat>>=1;
+ 103          //    if(IO)
+ 104          //      dat|=0x80;
+ 105          //    SCLK=1;
+ 106          //  }
+ 107          //  return dat;
+ 108          //} */
+ 109          ////??DS???
+ 110          //void ds_clear_wp()
+ 111          //{
+ 112          //  write_ds(0x8e,0x80);
+ 113          //}
+ 114          ////?????
+ 115          //void ds_set_wp()
+ 116          //{
+C51 COMPILER V9.55   MAIN2                                                                 02/10/2017 09:14:54 PAGE 3   
+
+ 117          //  write_ds(0x8e,0x80);
+ 118          //  RST=0;
+ 119          //  SCLK=0;
+ 120          //}
+ 121          ////????????
+ 122          //void set_ds_time(uchar addr)
+ 123          //{
+ 124          //  uchar i,j;
+ 125          //  ds_clear_wp();
+ 126          //  for(i=0;i<7;i++)
+ 127          //  {
+ 128          //    j=timedata[i]/10;
+ 129          //    timedata[i]%=10;
+ 130          //    timedata[i]+=j*16;
+ 131          //    write_ds(addr,timedata[i]);
+ 132          //    addr+=2;
+ 133          //  }
+ 134          //  ds_set_wp();
+ 135          //}
+ 136          ////??DS????,???????
+ 137          //void read_ds_time(uchar addr)
+ 138          //{
+ 139          //  uchar i;
+ 140          //  ds_clear_wp();      
+ 141          //  for(i = 0; i < 7; i++)  
+ 142          //  {
+ 143          //    timedata[i] = read_ds(addr);
+ 144          //    addr += 2;             
+ 145          //  }
+ 146          //  ds_set_wp();   //?????
+ 147          //} 
+ 148          //uchar bcd_dat(uchar dat)
+ 149          //{
+ 150          //  uchar dat1,dat2;
+ 151          //  dat1=dat/16;
+ 152          //  dat2=dat%16;
+ 153          //  dat2=dat2+dat1*10;
+ 154          //  return dat2;
+ 155          //} 
+ 156          //void main()
+ 157          //{
+ 158          //  lcdinit();
+ 159          //  set_ds_time(DS_W);
+ 160          //  LcdShowStr(0,0,"Data:");
+ 161          //  LcdShowStr(0,1,"Time:");
+ 162          //  while(1)
+ 163          //  {
+ 164          //    read_ds_time(DS_R);
+ 165          //    timedata[6]=bcd_dat(read_ds(0x8d));
+ 166          //    displayonestr(5,0,timedata[6]); //?
+ 167          //    displayonechar (7,0,'-');    //-
+ 168          //    displayonestr (8,0,timedata[4]); //?
+ 169          //    displayonechar (10,0,'-');     //-
+ 170          //    displayonestr (11,0,timedata[3]);//?
+ 171          //    displayonechar (13,0,'-');     //-
+ 172          //    displayonestr (14,0,timedata[5]);//??
+ 173          
+ 174          //    displayonestr (6,1,timedata[2]); //?
+ 175          //    displayonechar (8,1,':');    //:
+ 176          //    displayonestr (9,1,timedata[1]); //?
+ 177          //    displayonechar(11,1,':');    //:
+ 178          //    displayonestr (12,1,timedata[0]);//?
+C51 COMPILER V9.55   MAIN2                                                                 02/10/2017 09:14:54 PAGE 4   
+
+ 179          //    delayms(1000);        
+ 180          //  }
+ 181          //}
+ 182          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

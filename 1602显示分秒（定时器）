@@ -1,0 +1,183 @@
+#include<reg52.h>
+#define uchar unsigned char
+#define uint unsigned int
+
+sbit dula=P2^6;
+sbit wela=P2^7;
+sbit RS=P3^5;
+sbit RW=P3^6;
+sbit EN=P3^4;
+sbit beep=P2^3;
+sbit key1=P3^0;
+sbit key2=P3^1;
+sbit key3=P3^2;
+
+uchar min=30;
+uchar a;
+uchar hour=20;
+uchar sec=30;
+//检测忙
+void read_busy()
+{
+	uchar busy;
+	P0=0xff;
+	RS=0;
+	RW=1;
+	do{
+		EN=1;
+		busy=P0;
+		EN=0;
+	}while(busy&0x80);
+}
+//写指令
+void write_cmd(uchar cmd)
+{
+	read_busy();
+	RS=0;
+	RW=0;
+	P0=cmd;
+	EN=1;
+	EN=0;
+}
+//写数据
+void write_dat(uchar dat)
+{
+	read_busy();
+	RS=1;
+	RW=0;
+	P0=dat;
+	EN=1;
+	EN=0;
+}
+//延时函数
+void delayms(uint xms)
+{
+	uint i,j;
+	for(i=xms;i>0;i--)
+		for(j=114;j>0;j--);
+}
+
+void init()
+{
+	TMOD=0x01;
+	TH0=(65536-45872)/256;
+	TL0=(65536-45872)%256;
+	TR0=1;
+	EA=1;
+	ET0=1;
+}
+
+void lcdinit()
+{
+	dula=0;
+	wela=0;
+	EN=0;
+	write_cmd(0x38);
+	write_cmd(0x0c);
+	write_cmd(0x06);
+	write_cmd(0x01);
+}
+
+void display_char(uchar x,uchar y,uchar dat)
+{
+	if(y)
+		x|=0x40;
+	x|=0x80;
+	write_cmd(x);
+	write_dat(dat);
+}
+//显示二位数
+void display_str(uchar x,uchar y,uchar dat)
+{
+	display_char(x++,y,dat/10+'0');
+	display_char(x,y,dat%10+'0');
+}
+//显示字符串
+void LcdShow(uchar x,uchar y,uchar *str)
+{
+	if(y)
+		x|=0x40;
+	x|=0x80;
+	write_cmd(x);
+	while(*str!='\0')
+		write_dat(*str++);
+}
+void main()
+{
+	init();
+	lcdinit();
+	LcdShow(0,0,"TIME:");
+	LcdShow(7,0,":");
+	LcdShow(10,0,":");
+	LcdShow(10,0,":");
+	LcdShow(7,1,"2017/2/12");
+	while(1)
+	{
+		display_str(5,0,hour);
+		display_str(8,0,min);
+		display_str(11,0,sec);
+		if(!key1)
+		{
+			delayms(10);
+			if(!key1);
+			{
+				sec++;
+				if(sec==60)
+				{
+					sec=0;
+					min++;
+				}
+				while(!key1);
+			}
+		}
+		if(!key2)
+		{
+			delayms(10);
+			if(!key1);
+			{
+				sec--;
+				if(sec==0)
+				{
+					sec=59;
+					min--;
+				}
+				while(!key2);
+			}
+		}
+		if(!key3)
+		{
+			sec=0;
+			min=0;
+			hour=0;
+			while(!key3);
+		}
+	}
+}
+
+void T0_time() interrupt 1
+{
+	TH0=(65536-45872)/256;
+	TL0=(65536-45872)%256;
+	a++;
+	if(a==20)
+	{
+		a=0;
+		sec++;
+		if(sec==60)
+		{				
+			sec=0;
+			beep=0;
+			min++;
+			if(min==60)
+			{
+				min=0;
+				hour++;
+				beep=0;
+				delayms(200);
+				beep=1;
+			}			
+			delayms(200);
+			beep=1;
+		}
+	}
+}

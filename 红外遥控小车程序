@@ -1,0 +1,198 @@
+#include<reg52.h>
+#include<intrins.h>
+
+typedef unsigned char uchar;
+typedef unsigned int uint;
+
+
+//电机端口
+sbit M1A=P1^0;	//电机1正向端口
+sbit M1B=P1^1;	//电机1反向端口
+sbit M2A=P1^2;	//电机2反向端口
+sbit M2B=P1^3;	//电机2正向端口
+//				前进,后退，左转，右转，停止
+uchar r_data[]={0x40,0x19,0x07,0x09,0x15};
+uchar ircord[4];
+uchar irdata[33];
+uchar irtime;
+bit irok,irpro_ok;
+
+void init()
+{
+	TMOD=0X02;
+	TH0=0;
+	TL0=0;
+	EA=1;
+	ET0=1;
+	TR0=1;
+	
+	IT1=1;	//外部中断1方式选择位，为跳变沿触发方式，引脚INT1(P3^3)上从高到低的负跳变有效
+	EX1=1;	//开外部中断1
+}
+
+void T0_time() interrupt 1
+{
+	irtime++;
+}
+//外部中断1，接收数据
+void int1() interrupt 2
+{
+	static uchar i;
+	static bit startflag;
+	if(startflag)
+	{
+		if((irtime<53)&&(irtime>=32))
+			i=0;
+		irdata[i]=irtime;
+		irtime=0;
+		i++;
+		if(i==33)
+		{
+			irok=1;
+			i=0;
+		}
+	}
+	else
+	{
+		irtime=0;
+		startflag=1;
+	}
+}
+
+//红外解码
+void ircordpro()
+{
+	uchar i,j,k,cord,value;
+	k=1;
+	for(i=0;i<4;i++)
+	{
+		for(j=0;j<8;j++)
+		{
+			value>>=1;
+			cord=irdata[k];
+			if(cord>5)
+				value|=0x80;
+			k++;
+		}
+		ircord[i]=value;
+		value=0;
+	}
+	irpro_ok=1;
+}
+//ms延时函数
+void delayms(uint xms)
+{
+	uint i,j;
+	for(i=xms;i>0;i--)
+		for(j=114;j>0;j--);
+}
+//小车状态
+void stop()
+{
+	M1A=0;
+	M1B=0;
+	M2A=0;
+	M2B=0;
+}
+
+void forward()
+{
+	M1A=1;
+	M1B=0;
+	M2A=1;;
+	M2B=0;
+}
+
+void retreat()
+{
+   M1A=0;                                   
+   M1B=1;                                   
+   M2A=0;                                   
+   M2B=1;
+}
+
+void left()
+{
+   M1A=0;                                   
+   M1B=1;                                   
+   M2A=1;                                   
+   M2B=0;
+}
+
+void right()
+{
+   M1A=1;                                   
+   M1B=0;                                   
+   M2A=0;                                   
+   M2B=1;
+}
+//小车状态选择
+void ControlCar(uchar contype)
+{
+	stop();
+	switch(contype)
+	{
+		case 1:
+		{
+			stop();//前进之前，先停止一段时间，防止电机反向冲击主板，导致系统复位
+			delayms(200);
+			forward();
+			break;
+		}
+		case 2:
+		{
+			stop();
+			delayms(200);
+			retreat();		//后退
+			break;
+		}
+		case 3:
+		{
+			stop();
+			delayms(200);
+			left();		//左转
+			break;
+		}
+		case 4:
+		{
+			stop();
+			delayms(200);
+			right();	//右转
+			break;
+		}
+		case 5:
+		{
+			stop();
+			break;
+		}
+	}
+}
+
+void main()
+{
+	uchar j,N;
+	init();
+	while(1)
+	{
+		if(irok)
+		{
+			ircordpro();
+			irok=0;
+			if(irpro_ok)
+			{
+				EX1=0;
+				N=ircord[2];
+				for(j=0;j<5;j++)
+				{
+					if(N==r_data[j])
+					{
+						ControlCar(j+1);
+					}
+				}
+				irpro_ok=0;
+				EX1=1;
+			}
+		}
+	}
+}
+
